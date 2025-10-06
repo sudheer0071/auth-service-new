@@ -55,11 +55,17 @@ async def get_current_user(
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        # In the original Flask code, identity contains user info
-        # We need to import Users handler here (will be created later)
-        from ..handlers.users import Users
+        # In the new implementation, identity is the user ID string
+        user_id = identity if isinstance(identity, str) else identity.get('id')
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token payload - missing user ID",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         
-        user_id = identity.get('id') if isinstance(identity, dict) else identity
+        # Import Users handler
+        from ..handlers.users import Users
         user_info = Users.get_user_by_id(user_id)
         
         if not user_info:
@@ -141,7 +147,7 @@ async def get_refresh_user(
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        user_id = identity.get('id') if isinstance(identity, dict) else identity
+        user_id = identity if isinstance(identity, str) else identity.get('id')
         from ..handlers.users import Users
         user_info = Users.get_user_by_id(user_id)
         

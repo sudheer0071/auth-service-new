@@ -25,12 +25,12 @@ logger = logging.getLogger(__name__)
 app = create_app()
 
 # Include routers
-app.include_router(auth.router, prefix="/api/auth")
-app.include_router(user.router, prefix="/api/auth")
-app.include_router(hospital.router, prefix="/api/auth")
-app.include_router(doctor.router, prefix="/api/auth")
+app.include_router(auth.router, prefix="/api")
+app.include_router(user.router, prefix="/api")
+app.include_router(hospital.router, prefix="/api")
+app.include_router(doctor.router, prefix="/api")
 app.include_router(patient.router, prefix="/api/auth") 
-app.include_router(settings.router, prefix="/api/auth")
+app.include_router(settings.router, prefix="/api")
 app.include_router(profile.router, prefix="/api/auth")
 
 if __name__ == "__main__":

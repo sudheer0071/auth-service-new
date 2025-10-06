@@ -76,28 +76,28 @@ def create_app() -> FastAPI:
     )
     
     # Global exception handler
-    @app.exception_handler(HTTPException)
-    async def http_exception_handler(request, exc):
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={
-                "success": False,
-                "status_code": exc.status_code,
-                "message": exc.detail
-            }
-        )
+    # @app.exception_handler(HTTPException)
+    # async def http_exception_handler(request, exc):
+    #     return JSONResponse(
+    #         status_code=exc.status_code,
+    #         content={
+    #             "success": False,
+    #             "status_code": exc.status_code,
+    #             "message": exc.detail
+    #         }
+    #     )
     
-    @app.exception_handler(Exception)
-    async def general_exception_handler(request, exc):
-        logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={
-                "success": False,
-                "status_code": 500,
-                "message": "Internal server error"
-            }
-        )
+    # @app.exception_handler(Exception)
+    # async def general_exception_handler(request, exc):
+    #     logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+    #     return JSONResponse(
+    #         status_code=500,
+    #         content={
+    #             "success": False,
+    #             "status_code": 500,
+    #             "message": "Internal server error"
+    #         }
+    #     )
     
     # Health check endpoint
     @app.get("/api/auth/health")
@@ -111,17 +111,17 @@ def create_app() -> FastAPI:
         ).to_dict()
     
     # 404 handler
-    @app.get("/{full_path:path}")
-    async def catch_all(full_path: str):
-        """Catch-all route for 404 responses."""
-        return JSONResponse(
-            status_code=404,
-            content={
-                "success": False,
-                "status_code": 404,
-                "message": "Resource not found"
-            }
-        )
+    # @app.get("/{full_path:path}")
+    # async def catch_all(full_path: str):
+    #     """Catch-all route for 404 responses."""
+    #     return JSONResponse(
+    #         status_code=404,
+    #         content={
+    #             "success": False,
+    #             "status_code": 404,
+    #             "message": "Resource not found"
+    #         }
+    #     )
     
     return app
 

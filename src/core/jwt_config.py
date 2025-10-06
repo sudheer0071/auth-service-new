@@ -70,8 +70,9 @@ def create_refresh_token(data: Dict[str, Any], expires_delta: Optional[timedelta
 def verify_token(token: str, token_type: str = "access") -> Dict[str, Any]:
     """Verify and decode a JWT token."""
     try:
-        payload = jwt.decode(token, config.JWT_SECRET_KEY, algorithms=[config.JWT_ALGORITHM])
-        
+        print("tokennnnn ", token)
+        payload = jwt.decode(token, config.JWT_SECRET_KEY, algorithms=[config.JWT_ALGORITHM], subject=None)
+        print("payload ", payload)
         # Check token type
         if payload.get("type") != token_type:
             raise HTTPException(

@@ -10,7 +10,7 @@ from ..core import az_blob
 import os
 from pydantic import BaseModel
 
-router = APIRouter(prefix="/profile", tags=["profile"])
+router = APIRouter(prefix="/profile", tags=["profile_User"])
 
 AWS_S3_BUCKET_NAME = os.getenv('AWS_S3_BUCKET_NAME', "avinya-dev")
 AZURE_BLOB_CONTAINER_NAME = os.getenv('AZURE_BLOB_CONTAINER_NAME')
@@ -133,12 +133,15 @@ def generate_all_presigned_url(profile: Dict[str, Any]) -> dict:
 
     return profile
 
+@router.get("", response_model=Dict[str, Any])
 @router.get("/", response_model=Dict[str, Any])
 async def get_profile(
     current_user: CurrentUser = Depends(get_current_user)
 ):
     """Get user profile"""
     try:
+        print("reaching here/////// ")
+        # current_user='test'
         user_id = current_user.id
         user_profile = Users.get_profile_by_id(user_id)
         

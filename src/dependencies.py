@@ -1,6 +1,6 @@
 """FastAPI dependencies for database and external services."""
 
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, contextmanager
 import os
 import traceback
 import logging
@@ -35,6 +35,22 @@ def get_db() -> Generator[Session, None, None]:
 @asynccontextmanager
 async def get_session():
     """Async context manager for database sessions with automatic cleanup."""
+    session = SessionLocal()
+    try:
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Session error: {traceback.format_exc()}")
+        raise
+    finally:
+        session.close()
+
+
+# Synchronous context manager for handlers
+@contextmanager
+def get_sync_session():
+    """Synchronous context manager for database sessions with automatic cleanup."""
     session = SessionLocal()
     try:
         yield session

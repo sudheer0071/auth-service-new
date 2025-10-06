@@ -11,7 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
-from ..dependencies import get_session
+from ..dependencies import get_sync_session
 from ..core.jwt_config import get_password_hash, verify_password, create_access_token, create_refresh_token
 from ..core import config
 from ..models import UserTable
@@ -50,7 +50,7 @@ class Users:
         """Create admin user if it doesn't exist."""
         try:
             admin_user_id = config.ADMIN_USER_ID
-            with get_session() as session:
+            with get_sync_session() as session:
                 existing_admin = session.query(UserTable).filter_by(id=UUID(admin_user_id)).first()
                 
                 if not existing_admin:
@@ -77,7 +77,7 @@ class Users:
         
         try:
             # Use provided session or create context
-            use_session = nullcontext(session) if session else get_session()
+            use_session = nullcontext(session) if session else get_sync_session()
             
             with use_session as s:
                 if s.query(UserTable).filter_by(email=email).first():
@@ -107,7 +107,7 @@ class Users:
     def get_user_by_email(cls, email: str, session: Session = None) -> Optional[Dict[str, Any]]:
         """Get user by email."""
         try:
-            use_session = nullcontext(session) if session else get_session()
+            use_session = nullcontext(session) if session else get_sync_session()
             
             with use_session as s:
                 user = s.query(UserTable).filter_by(email=email).first()
@@ -123,7 +123,7 @@ class Users:
     def get_user_by_id(cls, user_id: str, session: Session = None) -> Optional[Dict[str, Any]]:
         """Get user by ID."""
         try:
-            use_session = nullcontext(session) if session else get_session()
+            use_session = nullcontext(session) if session else get_sync_session()
             
             with use_session as s:
                 user = s.query(UserTable).filter_by(id=UUID(user_id)).first()
@@ -139,16 +139,16 @@ class Users:
     def login(cls, email: str, password: str, session: Session = None) -> Tuple[Optional[str], Optional[str], Optional[Dict[str, Any]]]:
         """Authenticate user and return tokens."""
         try:
-            use_session = nullcontext(session) if session else get_session()
+            use_session = nullcontext(session) if session else get_sync_session()
             
             with use_session as s:
                 user = s.query(UserTable).filter_by(email=email).first()
                 
                 if user and verify_password(password, user.password):
                     # Create tokens
-                    user_data = {"id": str(user.id)}
-                    access_token = create_access_token(data={"sub": user_data})
-                    refresh_token = create_refresh_token(data={"sub": user_data})
+                    user_id = str(user.id)
+                    access_token = create_access_token(data={"sub": user_id})
+                    refresh_token = create_refresh_token(data={"sub": user_id})
                     
                     user_dict = user.to_dict(exclude_fields=['password'])
                     return access_token, refresh_token, user_dict
@@ -163,7 +163,7 @@ class Users:
     def update_password(cls, user_id: str, old_password: str, new_password: str, session: Session = None) -> bool:
         """Update user password."""
         try:
-            use_session = nullcontext(session) if session else get_session()
+            use_session = nullcontext(session) if session else get_sync_session()
             
             with use_session as s:
                 user = s.query(UserTable).filter_by(id=UUID(user_id)).first()
@@ -189,7 +189,7 @@ class Users:
     def delete_user_by_id(cls, user_id: str, session: Session = None) -> bool:
         """Delete user by ID."""
         try:
-            use_session = nullcontext(session) if session else get_session()
+            use_session = nullcontext(session) if session else get_sync_session()
             
             with use_session as s:
                 user = s.query(UserTable).filter_by(id=UUID(user_id)).first()

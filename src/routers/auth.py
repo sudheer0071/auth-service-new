@@ -283,7 +283,7 @@ async def refresh_token(
     try:
         # Create new access token
         new_access_token = create_access_token(
-            data={"sub": {"id": current_user.id}}
+            data={"sub": current_user.id}
         )
         
         return ApiResponse(
