@@ -1,0 +1,65 @@
+# FastAPI and server dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Authentication and security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.1.2
+
+# Existing core dependencies from Flask version
+annotated-types==0.7.0
+asgiref==3.8.1
+azure-core==1.34.0
+azure-identity==1.23.0
+azure-storage-blob==12.25.1
+blinker==1.7.0
+boto3==1.35.76
+botocore==1.35.76
+certifi==2024.7.4
+cffi==1.16.0
+charset-normalizer==3.3.2
+click==8.1.7
+colorama==0.4.6
+cryptography==42.0.2
+
+# Database dependencies
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.40
+
+# Data validation
+pydantic==2.11.4
+pydantic_core==2.33.2
+
+# Queue and messaging
+pika==1.3.2
+
+# Redis for JWT blacklist and caching
+redis==5.2.0
+
+# HTTP client
+requests==2.32.3
+
+# AWS S3
+s3transfer==0.10.4
+
+# Utilities
+python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
+uuid7==0.1.0
+
+# Azure dependencies
+h11==0.14.0
+idna==3.7
+isodate==0.7.2
+itsdangerous==2.1.2
+jmespath==1.0.1
+msal==1.32.3
+msal-extensions==1.3.1
+packaging==24.1
+pycparser==2.21
+six==1.16.0
+typing-inspection==0.4.0
+typing_extensions==4.13.2
+urllib3==2.2.2
