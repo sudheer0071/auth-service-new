@@ -7,7 +7,7 @@ from ..utils.wrappers.api_error import ApiError
 from ..utils import status_codes
 from ..utils import http_messages
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/user", tags=["users"])
 
 @router.get("", response_model=Dict[str, Any])
 async def get_all_users(
@@ -22,6 +22,41 @@ async def get_all_users(
             status_codes.HTTP_OK,
             users_data,
             http_messages.HTTP_GET_USERS_SUCCESS_MESSAGE
+        ).to_dict()
+    except Exception as e:
+        raise HTTPException(
+            status_code=status_codes.HTTP_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
+@router.get("/isunique", response_model=Dict[str, Any])
+async def check_is_unique_email_username(
+    email: Optional[str] = Query(None, description="Email to check"),
+    username: Optional[str] = Query(None, description="Username to check")
+):
+    """Check uniqueness of email and username"""
+    try:
+        is_unique_email = None
+        is_unique_username = None
+
+        # Check email uniqueness if provided
+        if email:
+            existing = Users.get_user_by_email(email)
+            is_unique_email = existing is None
+
+        # Check username uniqueness if provided
+        if username:
+            existing = Users.get_user_by_username(username)
+            is_unique_username = existing is None
+
+        return ApiResponse(
+            status_codes.HTTP_OK,
+            {
+                'isUniqueEmail': is_unique_email,
+                'isUniqueUsername': is_unique_username
+            },
+            http_messages.HTTP_GET_USER_SUCCESS_MESSAGE
         ).to_dict()
     except Exception as e:
         raise HTTPException(

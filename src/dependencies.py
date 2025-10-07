@@ -32,9 +32,9 @@ def get_db() -> Generator[Session, None, None]:
 
 
 # Context manager for database sessions (alternative approach)
-@asynccontextmanager
-async def get_session():
-    """Async context manager for database sessions with automatic cleanup."""
+@contextmanager
+def get_session():
+    """Context manager for database sessions with automatic cleanup."""
     session = SessionLocal()
     try:
         yield session

@@ -62,7 +62,7 @@ async def update_profile(
             result = Doctor.update_doctor_profile_by_id(user_id=user_id, data_to_be_updated=validated_data)
         else:
             result = Users.update_profile_by_id(user_id, updated_data=validated_data)
-        
+            
         if not result:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -140,8 +140,9 @@ async def get_profile(
 ):
     """Get user profile"""
     try:
-        print("reaching here/////// ")
+        print("current user ///////")
         # current_user='test'
+        
         user_id = current_user.id
         user_profile = Users.get_profile_by_id(user_id)
         

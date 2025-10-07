@@ -8,7 +8,7 @@ from ..utils import status_codes
 from ..utils import http_messages
 from pydantic import BaseModel
 
-router = APIRouter(prefix="/patients", tags=["patients"])
+router = APIRouter(prefix="/patient", tags=["patients"])
 
 class PatientRegistrationRequest(BaseModel):
     fullname: str
@@ -62,6 +62,7 @@ async def get_all_patients(
                 )
             
             patients_data = Patient.get_patients_by_hospital_id(q, hospital_id, sort_config=sort_config)
+            print("patients data")
         else:
             patients_data = Patient.get_all_patients_ADMIN_PERMISSION(q, sort_config=sort_config)
         

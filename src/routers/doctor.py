@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, HTTPException, status, Form, UploadFile, File
+from fastapi import APIRouter, Depends, Query, HTTPException, status, Form, UploadFile, File, Request
 from typing import Optional, Dict, Any
 from ..core.auth_dependencies import CurrentUser, get_current_user, require_admin_or_hospital
 from ..handlers.doctor import Doctor
@@ -10,21 +10,22 @@ from pydantic import BaseModel
 from ..core import az_blob
 import os
 
-router = APIRouter(prefix="/doctors", tags=["doctors"])
+router = APIRouter(prefix="/doctor", tags=["doctors"])
 
 AZURE_BLOB_CONTAINER_NAME = os.getenv('AZURE_BLOB_CONTAINER_NAME')
 
 class DoctorRegistrationRequest(BaseModel):
     email: str
-    fullname: str
-    phone: str
+    name: str
+    phone: Optional[str] = None
     password: str
-    confirm_password: str
+    username: str
+    confirm_password: Optional[str] = None
     hospital_id: Optional[str] = None
     department: Optional[str] = None
     speciality: Optional[str] = None
     qualification: Optional[str] = None
-    experience: Optional[int] = None
+    years_of_exp: Optional[int] = None
     registration_number: Optional[str] = None
 
 class DoctorUpdateRequest(BaseModel):
@@ -34,31 +35,37 @@ class DoctorUpdateRequest(BaseModel):
     department: Optional[str] = None
     speciality: Optional[str] = None
     qualification: Optional[str] = None
-    experience: Optional[int] = None
+    years_of_exp: Optional[int] = None
     registration_number: Optional[str] = None
     signature: Optional[str] = None
 
 @router.get("", response_model=Dict[str, Any])
 async def get_all_doctors(
+    request: Request,
     q: Optional[str] = Query("", description="Search query"),
     current_user: CurrentUser = Depends(get_current_user)
 ):
     """Get all doctors"""
     try:
-        if current_user.user_type != 'ADMIN':
+        # Build filters from query params
+        filters = dict(request.query_params)
+
+        # If the current user is scoped to a hospital, enforce hospital_id filter
+        if getattr(current_user, 'user_type', None) != 'ADMIN':
             hospital_info = getattr(current_user, 'hospital', None) or {}
             hospital_id = hospital_info.get('id') if isinstance(hospital_info, dict) else getattr(hospital_info, 'id', None)
-            
+
             if not hospital_id:
                 raise HTTPException(
                     status_code=status_codes.HTTP_BAD_REQUEST,
                     detail="Hospital context missing for current user"
                 )
-            
-            doctors_data = Doctor.get_doctors_by_hospital_id(q, hospital_id)
-        else:
-            doctors_data = Doctor.get_all_doctors_ADMIN_PERMISSION(q)
-        
+
+            filters['hospital_id'] = hospital_id
+
+        # Delegate to handler
+        doctors_data = Doctor.get_all(filters=filters)
+
         return ApiResponse(
             status_codes.HTTP_OK,
             doctors_data,
@@ -143,16 +150,17 @@ async def register_doctor(
     """Register a new doctor"""
     try:
         data_dict = data.dict()
-        
-        # Validate password confirmation
-        if data_dict['password'] != data_dict['confirm_password']:
+        print("data_dict:", data_dict)
+        # Validate password confirmation only if confirm_password is provided
+        confirm = data_dict.get('confirm_password')
+        if confirm is not None and data_dict['password'] != confirm:
             raise HTTPException(
                 status_code=status_codes.HTTP_BAD_REQUEST,
                 detail="Passwords do not match"
             )
-        
-        # Remove confirm_password from data
-        del data_dict['confirm_password']
+
+        # Remove confirm_password from data if present
+        data_dict.pop('confirm_password', None)
         
         if current_user.user_type == "HOSPITAL":
             hospital_info = getattr(current_user, 'hospital', None) or {}
@@ -160,7 +168,7 @@ async def register_doctor(
             data_dict['hospital_id'] = hospital_id
         
         # Validate required fields
-        required_fields = ['email', 'fullname', 'phone', 'password', 'hospital_id']
+        required_fields = ['email', 'name', 'username', 'password', 'hospital_id']
         missing_fields = [field for field in required_fields if not data_dict.get(field)]
         if missing_fields:
             raise HTTPException(

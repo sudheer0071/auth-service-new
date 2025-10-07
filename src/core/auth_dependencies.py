@@ -54,9 +54,10 @@ async def get_current_user(
                 detail="Invalid token payload",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+        print("identity ", identity)
         # In the new implementation, identity is the user ID string
         user_id = identity if isinstance(identity, str) else identity.get('id')
+        # print("user_id ", user_id)
         if not user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -67,7 +68,7 @@ async def get_current_user(
         # Import Users handler
         from ..handlers.users import Users
         user_info = Users.get_user_by_id(user_id)
-        
+        # print("user_info ", user_info)
         if not user_info:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -96,11 +97,13 @@ async def get_current_user(
             
             doctor_info = Doctor.get_doctor_by_userId(user_id=user_info['id'])
             user_data['doctor'] = doctor_info
-            
+            # print("user data updated", user_data)
             if doctor_info and doctor_info.get('hospital_id'):
                 hospital_id = doctor_info['hospital_id']
                 hospital_info = Hospital.get_hospital_by_id(hospital_id=hospital_id)
+                # print("hospital_info //////////", hospital_info)
                 user_data['hospital'] = hospital_info
+                # print("user data updated", user_data)
             else:
                 logger.warning(f"Doctor profile incomplete for user_id: {user_info['id']}")
                 user_data['hospital'] = None

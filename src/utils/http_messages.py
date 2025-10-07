@@ -51,3 +51,6 @@ HTTP_GET_PATIENTS_UNAUTHORIZED_MESSAGE = HTTP_UNAUTHORIZED_MESSAGE + \
     ' ' + 'Only admin can access all patients.'
 HTTP_GET_PATIENTS_SUCCESS_MESSAGE = HTTP_OK_MESSAGE + \
     ' ' + 'Patients retrieved successfully!'
+
+HTTP_GET_DOCTORS_SUCCESS_MESSAGE = HTTP_OK_MESSAGE + \
+    ' ' + 'Doctors retrieved successfully!'
